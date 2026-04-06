@@ -3,6 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const connectDB=require("./config/db");
+const taskRoutes=require("./routes/taskRoutes");
 
 const app = express();
 
@@ -12,6 +13,9 @@ connectDB();
 // middleware
 app.use(cors());
 app.use(express.json());
+
+// Routes
+app.use("/api/tasks",taskRoutes);
 
 // Test route
 app.get("/", (req, res) => {
