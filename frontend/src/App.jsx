@@ -34,34 +34,33 @@ function App() {
   };
 
   // Toggle complete task
- 
-  const handleToggleComplete = async (id, currentStatus, title) => {
-  try {
-    const res = await axios.put(`${API_URL}/${id}`, {
-      title,
-      completed: !currentStatus,
-    });
 
-    setTasks((prevTasks) =>
-      prevTasks.map((t) => (t._id === id ? res.data : t))
-    );
+  const handleToggleComplete = async (id, currentStatus, title) => {
+    try {
+      const res = await axios.put(`${API_URL}/${id}`, {
+        title,
+        completed: !currentStatus,
+      });
+
+      setTasks((prevTasks) =>
+        prevTasks.map((t) => (t._id === id ? res.data : t)),
+      );
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
+  };
+
+  // Delete Task
+  const handleDeleteTask = async (id) => {
+  try {
+    await axios.delete(`${API_URL}/${id}`);
+
+    setTasks((prevTasks) => prevTasks.filter((t) => t._id !== id));
   } catch (error) {
-    console.error("Error updating task:", error);
+    console.error("Error deleting task:", error);
   }
 };
-
-// Delete Task
-
-const handleDeleteTask=async()=>{
-try {
-  await axios.delete(`${API_URL}/${id}`);
-
-  setTasks((prevTasks)=>prevTasks.filter((t)=>t._id !== id));
-} catch (error) {
-  console.error("Error deleting task:", error);
-}
-}
-
+  
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -117,9 +116,10 @@ try {
                 {t.completed ? "Undo" : "Complete"}
               </button>
 
-              <button onClick={()=> handleDeleteTask(t._id)}
+              <button
+                onClick={() => handleDeleteTask(t._id)}
                 className="bg-red-600 text-white px-3 py-1 rounded"
-             >
+              >
                 Delete
               </button>
             </div>
