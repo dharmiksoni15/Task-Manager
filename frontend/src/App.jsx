@@ -4,6 +4,7 @@ import axios from "axios";
 function App() {
   const [task, setTask] = useState("");
   const [tasks, setTasks] = useState([]);
+  const [filter, setFilter] = useState("all");
 
   const API_URL = "http://localhost:5000/api/tasks";
 
@@ -52,15 +53,23 @@ function App() {
 
   // Delete Task
   const handleDeleteTask = async (id) => {
-  try {
-    await axios.delete(`${API_URL}/${id}`);
+    try {
+      await axios.delete(`${API_URL}/${id}`);
 
-    setTasks((prevTasks) => prevTasks.filter((t) => t._id !== id));
-  } catch (error) {
-    console.error("Error deleting task:", error);
-  }
-};
-  
+      setTasks((prevTasks) => prevTasks.filter((t) => t._id !== id));
+    } catch (error) {
+      console.error("Error deleting task:", error);
+    }
+  };
+
+  // filtered task list
+
+  const filteredTasks = tasks.filter((t) => {
+    if (filter === "completed") return t.completed === true;
+    if (filter === "pending") return t.completed === false;
+    return true;
+  });
+
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -90,9 +99,45 @@ function App() {
           </button>
         </div>
 
+        {/* Filter Buttons */}
+
+        {/* Filter Buttons */}
+<div className="flex gap-2 mb-4">
+  <button
+    onClick={() => setFilter("all")}
+    className={`px-4 py-2 rounded-md ${
+      filter === "all" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"
+    }`}
+  >
+    All
+  </button>
+
+  <button
+    onClick={() => setFilter("completed")}
+    className={`px-4 py-2 rounded-md ${
+      filter === "completed"
+        ? "bg-green-600 text-white"
+        : "bg-gray-200 text-black"
+    }`}
+  >
+    Completed
+  </button>
+
+  <button
+    onClick={() => setFilter("pending")}
+    className={`px-4 py-2 rounded-md ${
+      filter === "pending"
+        ? "bg-yellow-500 text-white"
+        : "bg-gray-200 text-black"
+    }`}
+  >
+    Pending
+  </button>
+</div>
+      
         {/* Task List */}
         <div>
-          {tasks.map((t) => (
+          {filteredTasks.map((t) => (
             <div
               key={t._id}
               className="flex justify-between items-center border p-3 rounded mb-2 bg-gray-50"
