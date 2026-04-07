@@ -50,6 +50,18 @@ function App() {
   }
 };
 
+// Delete Task
+
+const handleDeleteTask=async()=>{
+try {
+  await axios.delete(`${API_URL}/${id}`);
+
+  setTasks((prevTasks)=>prevTasks.filter((t)=>t._id !== id));
+} catch (error) {
+  console.error("Error deleting task:", error);
+}
+}
+
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -103,6 +115,12 @@ function App() {
                 }`}
               >
                 {t.completed ? "Undo" : "Complete"}
+              </button>
+
+              <button onClick={()=> handleDeleteTask(t._id)}
+                className="bg-red-600 text-white px-3 py-1 rounded"
+             >
+                Delete
               </button>
             </div>
           ))}
