@@ -5,6 +5,7 @@ function App() {
   const [task, setTask] = useState("");
   const [tasks, setTasks] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const API_URL = "http://localhost:5000/api/tasks";
 
@@ -70,6 +71,12 @@ function App() {
     return true;
   });
 
+  // searched tasks
+
+  const searchedTasks = filteredTasks.filter((t) =>
+    t.title.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -99,45 +106,55 @@ function App() {
           </button>
         </div>
 
+        {/* search input */}
+
+        {/* Search Input */}
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full border p-2 rounded-md mb-4"
+        />
         {/* Filter Buttons */}
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setFilter("all")}
+            className={`px-4 py-2 rounded-md ${
+              filter === "all"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-black"
+            }`}
+          >
+            All
+          </button>
 
-        {/* Filter Buttons */}
-<div className="flex gap-2 mb-4">
-  <button
-    onClick={() => setFilter("all")}
-    className={`px-4 py-2 rounded-md ${
-      filter === "all" ? "bg-blue-600 text-white" : "bg-gray-200 text-black"
-    }`}
-  >
-    All
-  </button>
+          <button
+            onClick={() => setFilter("completed")}
+            className={`px-4 py-2 rounded-md ${
+              filter === "completed"
+                ? "bg-green-600 text-white"
+                : "bg-gray-200 text-black"
+            }`}
+          >
+            Completed
+          </button>
 
-  <button
-    onClick={() => setFilter("completed")}
-    className={`px-4 py-2 rounded-md ${
-      filter === "completed"
-        ? "bg-green-600 text-white"
-        : "bg-gray-200 text-black"
-    }`}
-  >
-    Completed
-  </button>
+          <button
+            onClick={() => setFilter("pending")}
+            className={`px-4 py-2 rounded-md ${
+              filter === "pending"
+                ? "bg-yellow-500 text-white"
+                : "bg-gray-200 text-black"
+            }`}
+          >
+            Pending
+          </button>
+        </div>
 
-  <button
-    onClick={() => setFilter("pending")}
-    className={`px-4 py-2 rounded-md ${
-      filter === "pending"
-        ? "bg-yellow-500 text-white"
-        : "bg-gray-200 text-black"
-    }`}
-  >
-    Pending
-  </button>
-</div>
-      
         {/* Task List */}
         <div>
-          {filteredTasks.map((t) => (
+          {searchedTasks.map((t) => (
             <div
               key={t._id}
               className="flex justify-between items-center border p-3 rounded mb-2 bg-gray-50"
