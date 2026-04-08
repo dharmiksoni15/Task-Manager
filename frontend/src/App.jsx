@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const [task, setTask] = useState("");
@@ -18,12 +20,16 @@ function App() {
       setTasks(res.data);
     } catch (error) {
       console.error("Error fetching tasks:", error);
+      toast.error("Failed to fetch tasks");
     }
   };
 
   // Add new task OR update existing task
   const handleAddTask = async () => {
-    if (!task.trim()) return;
+    if (!task.trim()) {
+      toast.error("Task cannot be empty");
+      return;
+    }
 
     try {
       if (isEditing) {
@@ -41,6 +47,7 @@ function App() {
         setTask("");
         setIsEditing(false);
         setEditTaskId(null);
+        toast.success("Task updated successfully");
       } else {
         const res = await axios.post(API_URL, {
           title: task,
@@ -48,9 +55,11 @@ function App() {
 
         setTasks((prevTasks) => [res.data, ...prevTasks]);
         setTask("");
+        toast.success("Task added successfully");
       }
     } catch (error) {
       console.error("Error saving task:", error);
+      toast.error("Failed to save task");
     }
   };
 
@@ -65,8 +74,15 @@ function App() {
       setTasks((prevTasks) =>
         prevTasks.map((t) => (t._id === id ? res.data : t))
       );
+
+      toast.success(
+        !currentStatus
+          ? "Task marked as completed"
+          : "Task marked as pending"
+      );
     } catch (error) {
       console.error("Error updating task:", error);
+      toast.error("Failed to update task status");
     }
   };
 
@@ -75,8 +91,10 @@ function App() {
     try {
       await axios.delete(`${API_URL}/${id}`);
       setTasks((prevTasks) => prevTasks.filter((t) => t._id !== id));
+      toast.success("Task deleted successfully");
     } catch (error) {
       console.error("Error deleting task:", error);
+      toast.error("Failed to delete task");
     }
   };
 
@@ -112,6 +130,8 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <ToastContainer position="top-right" autoClose={2000} />
+
       <div className="w-full max-w-xl bg-white shadow-md rounded-lg p-6">
         <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
           Task Manager
