@@ -11,7 +11,7 @@ function App() {
   const [isEditing, setIsEditing] = useState(false);
   const [editTaskId, setEditTaskId] = useState(null);
 
-  const API_URL = "http://localhost:5000/api/tasks";
+  const API_URL = import.meta.env.VITE_API_URL;
 
   // Fetch all tasks
   const fetchTasks = async () => {
@@ -145,7 +145,7 @@ const pendingTasks = tasks.filter((t) => !t.completed).length;
 
       <div className="w-full max-w-xl bg-white shadow-md rounded-lg p-6">
         <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
-          Task Manager
+         TaskFlow – a MERN Task Manager web app 🚀
         </h1>
 
         {/* Input + Button */}
