@@ -6,6 +6,8 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTaskId, setEditTaskId] = useState(null);
 
   const API_URL = "http://localhost:5000/api/tasks";
 
@@ -19,24 +21,40 @@ function App() {
     }
   };
 
-  // Add new task
+  // Add new task OR update existing task
   const handleAddTask = async () => {
     if (!task.trim()) return;
 
     try {
-      const res = await axios.post(API_URL, {
-        title: task,
-      });
+      if (isEditing) {
+        const taskToEdit = tasks.find((t) => t._id === editTaskId);
 
-      setTasks([res.data, ...tasks]);
-      setTask("");
+        const res = await axios.put(`${API_URL}/${editTaskId}`, {
+          title: task,
+          completed: taskToEdit.completed,
+        });
+
+        setTasks((prevTasks) =>
+          prevTasks.map((t) => (t._id === editTaskId ? res.data : t))
+        );
+
+        setTask("");
+        setIsEditing(false);
+        setEditTaskId(null);
+      } else {
+        const res = await axios.post(API_URL, {
+          title: task,
+        });
+
+        setTasks((prevTasks) => [res.data, ...prevTasks]);
+        setTask("");
+      }
     } catch (error) {
-      console.error("Error adding task:", error);
+      console.error("Error saving task:", error);
     }
   };
 
   // Toggle complete task
-
   const handleToggleComplete = async (id, currentStatus, title) => {
     try {
       const res = await axios.put(`${API_URL}/${id}`, {
@@ -45,7 +63,7 @@ function App() {
       });
 
       setTasks((prevTasks) =>
-        prevTasks.map((t) => (t._id === id ? res.data : t)),
+        prevTasks.map((t) => (t._id === id ? res.data : t))
       );
     } catch (error) {
       console.error("Error updating task:", error);
@@ -56,25 +74,36 @@ function App() {
   const handleDeleteTask = async (id) => {
     try {
       await axios.delete(`${API_URL}/${id}`);
-
       setTasks((prevTasks) => prevTasks.filter((t) => t._id !== id));
     } catch (error) {
       console.error("Error deleting task:", error);
     }
   };
 
-  // filtered task list
+  // Start editing
+  const handleEditTask = (taskItem) => {
+    setTask(taskItem.title);
+    setIsEditing(true);
+    setEditTaskId(taskItem._id);
+  };
 
+  // Cancel editing
+  const handleCancelEdit = () => {
+    setTask("");
+    setIsEditing(false);
+    setEditTaskId(null);
+  };
+
+  // Filtered Tasks
   const filteredTasks = tasks.filter((t) => {
     if (filter === "completed") return t.completed === true;
     if (filter === "pending") return t.completed === false;
     return true;
   });
 
-  // searched tasks
-
+  // Search on filtered tasks
   const searchedTasks = filteredTasks.filter((t) =>
-    t.title.toLowerCase().includes(searchTerm.toLowerCase()),
+    t.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {
@@ -102,11 +131,18 @@ function App() {
             onClick={handleAddTask}
             className="bg-blue-600 text-white px-4 py-2 rounded-md"
           >
-            Add
+            {isEditing ? "Update" : "Add"}
           </button>
-        </div>
 
-        {/* search input */}
+          {isEditing && (
+            <button
+              onClick={handleCancelEdit}
+              className="bg-gray-500 text-white px-4 py-2 rounded-md"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
 
         {/* Search Input */}
         <input
@@ -116,6 +152,7 @@ function App() {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full border p-2 rounded-md mb-4"
         />
+
         {/* Filter Buttons */}
         <div className="flex gap-2 mb-4">
           <button
@@ -167,23 +204,32 @@ function App() {
                 {t.title}
               </span>
 
-              <button
-                onClick={() =>
-                  handleToggleComplete(t._id, t.completed, t.title)
-                }
-                className={`px-3 py-1 rounded text-white ${
-                  t.completed ? "bg-yellow-500" : "bg-green-600"
-                }`}
-              >
-                {t.completed ? "Undo" : "Complete"}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() =>
+                    handleToggleComplete(t._id, t.completed, t.title)
+                  }
+                  className={`px-3 py-1 rounded text-white ${
+                    t.completed ? "bg-yellow-500" : "bg-green-600"
+                  }`}
+                >
+                  {t.completed ? "Undo" : "Complete"}
+                </button>
 
-              <button
-                onClick={() => handleDeleteTask(t._id)}
-                className="bg-red-600 text-white px-3 py-1 rounded"
-              >
-                Delete
-              </button>
+                <button
+                  onClick={() => handleEditTask(t)}
+                  className="bg-yellow-600 text-white px-3 py-1 rounded"
+                >
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => handleDeleteTask(t._id)}
+                  className="bg-red-600 text-white px-3 py-1 rounded"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>
