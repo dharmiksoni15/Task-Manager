@@ -146,9 +146,9 @@ const pendingTasks = tasks.filter((t) => !t.completed).length;
       <ToastContainer position="top-right" autoClose={2000} />
 
       <div className="w-full max-w-xl bg-white shadow-md rounded-lg p-6">
-        <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
+        <h4 className="text-3xl font-bold text-center text-blue-600 mb-6">
          TaskFlow – a MERN Task Manager web app 🚀
-        </h1>
+        </h4>
 
         {/* Input + Button */}
         <div className="flex gap-2 mb-4">
