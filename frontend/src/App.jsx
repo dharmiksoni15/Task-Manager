@@ -16,8 +16,10 @@ function App() {
   // Fetch all tasks
   const fetchTasks = async () => {
     try {
-      const res = await axios.get(API_URL);
+      const res = await axios.get(`${API_URL}/api/tasks`);
+      console.log(res.data);
       setTasks(res.data);
+      
     } catch (error) {
       console.error("Error fetching tasks:", error);
       toast.error("Failed to fetch tasks");
@@ -35,7 +37,7 @@ function App() {
       if (isEditing) {
         const taskToEdit = tasks.find((t) => t._id === editTaskId);
 
-        const res = await axios.put(`${API_URL}/${editTaskId}`, {
+        const res = await axios.put(`${API_URL}/api/tasks/${editTaskId}`, {
           title: task,
           completed: taskToEdit.completed,
         });
@@ -49,7 +51,7 @@ function App() {
         setEditTaskId(null);
         toast.success("Task updated successfully");
       } else {
-        const res = await axios.post(API_URL, {
+        const res = await axios.post(`${API_URL}/api/tasks`, {
           title: task,
         });
 
@@ -66,7 +68,7 @@ function App() {
   // Toggle complete task
   const handleToggleComplete = async (id, currentStatus, title) => {
     try {
-      const res = await axios.put(`${API_URL}/${id}`, {
+      const res = await axios.put(`${API_URL}/api/tasks/${id}`, {
         title,
         completed: !currentStatus,
       });
@@ -95,7 +97,7 @@ const handleDeleteTask = async (id) => {
   if (!confirmDelete) return;
 
   try {
-    await axios.delete(`${API_URL}/${id}`);
+    await axios.delete(`${API_URL}/api/tasks/${id}`);
     setTasks((prevTasks) => prevTasks.filter((t) => t._id !== id));
     toast.success("Task deleted successfully");
   } catch (error) {
