@@ -87,16 +87,22 @@ function App() {
   };
 
   // Delete Task
-  const handleDeleteTask = async (id) => {
-    try {
-      await axios.delete(`${API_URL}/${id}`);
-      setTasks((prevTasks) => prevTasks.filter((t) => t._id !== id));
-      toast.success("Task deleted successfully");
-    } catch (error) {
-      console.error("Error deleting task:", error);
-      toast.error("Failed to delete task");
-    }
-  };
+const handleDeleteTask = async (id) => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this task?"
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    await axios.delete(`${API_URL}/${id}`);
+    setTasks((prevTasks) => prevTasks.filter((t) => t._id !== id));
+    toast.success("Task deleted successfully");
+  } catch (error) {
+    console.error("Error deleting task:", error);
+    toast.error("Failed to delete task");
+  }
+};
 
   // Start editing
   const handleEditTask = (taskItem) => {
