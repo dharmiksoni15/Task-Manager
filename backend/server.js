@@ -12,24 +12,22 @@ const allowedOrigins = [
   "https://task-manager-virid-kappa.vercel.app",
 ];
 
-// CORS middleware
+// CORS
 app.use(
   cors({
     origin: function (origin, callback) {
+      // Postman / browser direct open / same-server requests may have no origin
       if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
+        return callback(null, true);
       }
+      return callback(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type"],
   })
 );
 
-// Preflight requests handle karo
-app.options("*", cors());
-
+// JSON middleware
 app.use(express.json());
 
 // Test route
@@ -40,7 +38,7 @@ app.get("/", (req, res) => {
 // Routes
 app.use("/api/tasks", taskRoutes);
 
-// Connect Database
+// Database connect
 connectDB();
 
 // Port
