@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
+import { fetchTasksApi, addTaskApi, updateTaskApi, deleteTaskApi } from "./api/taskApi";
+import TaskInput from "./components/TaskInput";
+import SearchBar from "./components/SearchBar";
+import FilterButtons from "./components/FilterButtons";
+import TaskSummary from "./components/TaskSummary";
+import TaskList from "./components/TaskList";
 
 function App() {
   const [task, setTask] = useState("");
@@ -11,275 +17,92 @@ function App() {
   const [isEditing, setIsEditing] = useState(false);
   const [editTaskId, setEditTaskId] = useState(null);
 
-  const API_URL = import.meta.env.VITE_API_URL;
+  useEffect(() => {
+    const loadTasks = async () => {
+      try {
+        const data = await fetchTasksApi();
+        setTasks(data);
+      } catch {
+        toast.error("Failed to fetch tasks");
+      }
+    };
+    loadTasks();
+  }, []);
 
-  // Fetch all tasks
-  const fetchTasks = async () => {
-    try {
-      const res = await axios.get(`${API_URL}/api/tasks`);
-      console.log(res.data);
-      setTasks(res.data);
-      
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
-      toast.error("Failed to fetch tasks");
-    }
-  };
-
-  // Add new task OR update existing task
   const handleAddTask = async () => {
-    if (!task.trim()) {
-      toast.error("Task cannot be empty");
-      return;
-    }
-
+    if (!task.trim()) { toast.error("Task cannot be empty"); return; }
     try {
       if (isEditing) {
         const taskToEdit = tasks.find((t) => t._id === editTaskId);
-
-        const res = await axios.put(`${API_URL}/api/tasks/${editTaskId}`, {
-          title: task,
-          completed: taskToEdit.completed,
-        });
-
-        setTasks((prevTasks) =>
-          prevTasks.map((t) => (t._id === editTaskId ? res.data : t))
-        );
-
-        setTask("");
+        const updated = await updateTaskApi(editTaskId, task, taskToEdit.completed);
+        setTasks((prev) => prev.map((t) => (t._id === editTaskId ? updated : t)));
         setIsEditing(false);
         setEditTaskId(null);
         toast.success("Task updated successfully");
       } else {
-        const res = await axios.post(`${API_URL}/api/tasks`, {
-          title: task,
-        });
-
-        setTasks((prevTasks) => [res.data, ...prevTasks]);
-        setTask("");
+        const newTask = await addTaskApi(task);
+        setTasks((prev) => [newTask, ...prev]);
         toast.success("Task added successfully");
       }
-    } catch (error) {
-      console.error("Error saving task:", error);
+      setTask("");
+    } catch {
       toast.error("Failed to save task");
     }
   };
 
-  // Toggle complete task
   const handleToggleComplete = async (id, currentStatus, title) => {
     try {
-      const res = await axios.put(`${API_URL}/api/tasks/${id}`, {
-        title,
-        completed: !currentStatus,
-      });
-
-      setTasks((prevTasks) =>
-        prevTasks.map((t) => (t._id === id ? res.data : t))
-      );
-
-      toast.success(
-        !currentStatus
-          ? "Task marked as completed"
-          : "Task marked as pending"
-      );
-    } catch (error) {
-      console.error("Error updating task:", error);
+      const updated = await updateTaskApi(id, title, !currentStatus);
+      setTasks((prev) => prev.map((t) => (t._id === id ? updated : t)));
+      toast.success(!currentStatus ? "Task marked as completed" : "Task marked as pending");
+    } catch {
       toast.error("Failed to update task status");
     }
   };
 
-  // Delete Task
-const handleDeleteTask = async (id) => {
-  const confirmDelete = window.confirm(
-    "Are you sure you want to delete this task?"
-  );
+  const handleDeleteTask = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this task?")) return;
+    try {
+      await deleteTaskApi(id);
+      setTasks((prev) => prev.filter((t) => t._id !== id));
+      toast.success("Task deleted successfully");
+    } catch {
+      toast.error("Failed to delete task");
+    }
+  };
 
-  if (!confirmDelete) return;
-
-  try {
-    await axios.delete(`${API_URL}/api/tasks/${id}`);
-    setTasks((prevTasks) => prevTasks.filter((t) => t._id !== id));
-    toast.success("Task deleted successfully");
-  } catch (error) {
-    console.error("Error deleting task:", error);
-    toast.error("Failed to delete task");
-  }
-};
-
-  // Start editing
   const handleEditTask = (taskItem) => {
     setTask(taskItem.title);
     setIsEditing(true);
     setEditTaskId(taskItem._id);
   };
 
-  // Cancel editing
   const handleCancelEdit = () => {
     setTask("");
     setIsEditing(false);
     setEditTaskId(null);
   };
 
-  // Filtered Tasks
-  const filteredTasks = tasks.filter((t) => {
-    if (filter === "completed") return t.completed === true;
-    if (filter === "pending") return t.completed === false;
-    return true;
-  });
-
-  // Search on filtered tasks
-  const searchedTasks = filteredTasks.filter((t) =>
-    t.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-// Task Summary
-
-const totalTasks=tasks.length;
-const completedTasks = tasks.filter((t)=>t.completed).length;
-const pendingTasks = tasks.filter((t) => !t.completed).length;
-  useEffect(() => {
-    fetchTasks();
-  }, []);
+  const filteredTasks = tasks
+    .filter((t) => {
+      if (filter === "completed") return t.completed === true;
+      if (filter === "pending") return t.completed === false;
+      return true;
+    })
+    .filter((t) => t.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <ToastContainer position="top-right" autoClose={2000} />
-
       <div className="w-full max-w-xl bg-white shadow-md rounded-lg p-6">
         <h4 className="text-3xl font-bold text-center text-blue-600 mb-6">
-         TaskFlow – a MERN Task Manager web app 🚀
+          TaskFlow – a MERN Task Manager web app 🚀
         </h4>
-
-        {/* Input + Button */}
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            placeholder="Enter Task..."
-            value={task}
-            onChange={(e) => setTask(e.target.value)}
-            className="flex-1 border p-2 rounded-md"
-          />
-
-          <button
-            onClick={handleAddTask}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md"
-          >
-            {isEditing ? "Update" : "Add"}
-          </button>
-
-          {isEditing && (
-            <button
-              onClick={handleCancelEdit}
-              className="bg-gray-500 text-white px-4 py-2 rounded-md"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-
-        {/* Search Input */}
-        <input
-          type="text"
-          placeholder="Search tasks..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full border p-2 rounded-md mb-4"
-        />
-
-        {/* Filter Buttons */}
-        <div className="flex gap-2 mb-4">
-          <button
-            onClick={() => setFilter("all")}
-            className={`px-4 py-2 rounded-md ${
-              filter === "all"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-black"
-            }`}
-          >
-            All
-          </button>
-
-          <button
-            onClick={() => setFilter("completed")}
-            className={`px-4 py-2 rounded-md ${
-              filter === "completed"
-                ? "bg-green-600 text-white"
-                : "bg-gray-200 text-black"
-            }`}
-          >
-            Completed
-          </button>
-
-          <button
-            onClick={() => setFilter("pending")}
-            className={`px-4 py-2 rounded-md ${
-              filter === "pending"
-                ? "bg-yellow-500 text-white"
-                : "bg-gray-200 text-black"
-            }`}
-          >
-            Pending
-          </button>
-        </div>
-
-        <div className="grid grid-cols-3 gap-3 mb-4 text-center">
-          <div className="bg-blue-100 text-blue-700 p-3 rounded-md font-semibold">
-            Total:{totalTasks}
-          </div>
-
-           <div className="bg-green-100 text-green-700 p-3 rounded-md font-semibold">
-    Completed: {completedTasks}
-  </div>
-
-  <div className="bg-yellow-100 text-yellow-700 p-3 rounded-md font-semibold">
-    Pending: {pendingTasks}
-  </div>
-        </div>
-
-        {/* Task List */}
-        <div>
-          {searchedTasks.map((t) => (
-            <div
-              key={t._id}
-              className="flex justify-between items-center border p-3 rounded mb-2 bg-gray-50"
-            >
-              <span
-                className={`${
-                  t.completed ? "line-through text-gray-400" : "text-gray-800"
-                }`}
-              >
-                {t.title}
-              </span>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() =>
-                    handleToggleComplete(t._id, t.completed, t.title)
-                  }
-                  className={`px-3 py-1 rounded text-white ${
-                    t.completed ? "bg-yellow-500" : "bg-green-600"
-                  }`}
-                >
-                  {t.completed ? "Undo" : "Complete"}
-                </button>
-
-                <button
-                  onClick={() => handleEditTask(t)}
-                  className="bg-yellow-600 text-white px-3 py-1 rounded"
-                >
-                  Edit
-                </button>
-
-                <button
-                  onClick={() => handleDeleteTask(t._id)}
-                  className="bg-red-600 text-white px-3 py-1 rounded"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <TaskInput task={task} setTask={setTask} isEditing={isEditing} onAdd={handleAddTask} onCancel={handleCancelEdit} />
+        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        <FilterButtons filter={filter} setFilter={setFilter} />
+        <TaskSummary total={tasks.length} completed={tasks.filter((t) => t.completed).length} pending={tasks.filter((t) => !t.completed).length} />
+        <TaskList tasks={filteredTasks} onToggle={handleToggleComplete} onEdit={handleEditTask} onDelete={handleDeleteTask} />
       </div>
     </div>
   );
