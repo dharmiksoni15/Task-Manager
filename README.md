@@ -1,3 +1,91 @@
+# ✅ TaskFlow — MERN Stack Task Manager
+
+> A clean, responsive, full-stack Task Manager built with the MERN stack. Manage your daily tasks with ease — add, edit, delete, filter, and search tasks in real time with a polished UI.
+
+[![Live Demo](https://img.shields.io/badge/Frontend-Vercel-black?style=flat-square&logo=vercel)](https://task-manager-virid-kappa.vercel.app)
+[![API Status](https://img.shields.io/badge/Backend-Render-46E3B7?style=flat-square&logo=render)](https://task-manager-xwzj.onrender.com)
+[![MongoDB](https://img.shields.io/badge/Database-MongoDB_Atlas-47A248?style=flat-square&logo=mongodb)](https://www.mongodb.com/)
+[![React](https://img.shields.io/badge/Frontend-React.js-61DAFB?style=flat-square&logo=react)](https://reactjs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+
+---
+
+## 🌐 Live Demo
+
+| Service | URL |
+|--------|-----|
+| 🖥️ Frontend | [task-manager-virid-kappa.vercel.app](https://task-manager-virid-kappa.vercel.app) |
+| ⚙️ Backend API | [task-manager-xwzj.onrender.com/api/tasks](https://task-manager-xwzj.onrender.com/api/tasks) |
+| 📦 Repository | [github.com/dharmiksoni15/Task-Manager](https://github.com/dharmiksoni15/Task-Manager) |
+
+---
+
+## ✨ Features
+
+### 📝 Task Management
+- ➕ Add new tasks instantly from the input bar
+- ✏️ Inline editing — edit task titles without any modal
+- 🗑️ Delete tasks with confirmation
+- ✅ Mark tasks as completed / undo completion
+
+### 🔍 Productivity
+- 🔎 Case-insensitive live search across all tasks
+- 🔽 Filter tasks by: **All / Completed / Pending**
+- 📊 Task summary showing Total, Completed, and Pending counts
+
+### 🎯 User Experience
+- 🔔 Toast notifications for every action
+- ⏳ Loading spinner during API calls
+- 📱 Fully responsive UI built with Tailwind CSS
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | React.js, Tailwind CSS, Axios, React Hooks |
+| **Backend** | Node.js, Express.js, REST API |
+| **Database** | MongoDB Atlas, Mongoose |
+| **Deployment** | Vercel (Frontend), Render (Backend) |
+
+---
+
+## 📁 Project Structure
+
+```
+Task-Manager/
+|
+|-- frontend/
+|   |-- public/
+|   |-- src/
+|       |-- api/
+|       |   |-- taskApi.js
+|       |-- components/
+|       |   |-- TaskInput.jsx
+|       |   |-- SearchBar.jsx
+|       |   |-- FilterButtons.jsx
+|       |   |-- TaskSummary.jsx
+|       |   |-- TaskItem.jsx
+|       |   |-- TaskList.jsx
+|       |-- App.jsx
+|       |-- main.jsx
+|
+|-- backend/
+|   |-- config/
+|   |   |-- db.js
+|   |-- controllers/
+|   |   |-- taskController.js
+|   |-- models/
+|   |   |-- Task.js
+|   |-- routes/
+|   |   |-- taskRoutes.js
+|   |-- .env
+|   |-- server.js
+|
+|-- README.md
+```
+
 ---
 
 ## ⚙️ Installation & Setup
@@ -6,14 +94,14 @@
 - Node.js v18+
 - MongoDB Atlas account (or local MongoDB)
 
-### 1️⃣ Clone the Repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/dharmiksoni15/Task-Manager.git
 cd Task-Manager
 ```
 
-### 2️⃣ Backend Setup
+### 2. Backend Setup
 
 ```bash
 cd backend
@@ -28,7 +116,7 @@ PORT=5000
 MONGO_URI=your_mongodb_connection_string
 ```
 
-### 3️⃣ Frontend Setup
+### 3. Frontend Setup
 
 ```bash
 cd frontend
@@ -46,14 +134,14 @@ VITE_API_URL=http://localhost:5000
 
 ## 🔐 Environment Variables
 
-### Backend — `backend/.env`
+### Backend
 
 ```env
 PORT=5000
 MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/taskflow
 ```
 
-### Frontend — `frontend/.env`
+### Frontend
 
 ```env
 VITE_API_URL=https://task-manager-xwzj.onrender.com
@@ -103,7 +191,7 @@ POST /api/tasks
 | **Environment variables** not loading in production | Added all required env vars via Render & Vercel dashboard settings |
 | **API connection issues** after deployment | Switched from `localhost` to the production URL using `VITE_API_URL` in `.env` |
 | **Component structure** getting too large | Broke `App.jsx` into 6 focused components and moved all API calls to `src/api/taskApi.js` |
-| **MVC architecture** on the backend | Separated logic into `controllers/`, `routes/`, and `models/` — routes only define endpoints |
+| **MVC architecture** on the backend | Separated logic into `controllers/`, `routes/`, and `models/` folders |
 
 ---
 
